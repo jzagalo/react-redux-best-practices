@@ -1,26 +1,68 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { createStore, combineReducers, applyMiddleware } from "redux";
+import { createLogger  } from "redux-logger";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const mathReducer = (state = {
+  result: 1,
+  lastValues: []
+}, action) => {
+  switch(action.type){
+    case "ADD":
+      state ={ 
+        ...state,
+        result: state.result + action.payload, 
+        lastValues: [ ...state.lastValues, action.payload]        
+      };
+   
+      break;
+    case "SUBTRACT":
+      state ={ 
+        ...state,
+        result: state.result - action.payload,
+        lastValues: [ ...state.lastValues, action.payload]        
+      };
+     
+      break;
+  }
+  return state;
+};
 
-export default App;
+const userReducer = (state = {
+  name: "Max",
+  age: 27
+}, action) => {
+  switch(action.type){
+    case "SET_NAME":
+      state ={ 
+        ...state,
+       name: action.payload       
+      };
+   
+      break;
+    case "SET_AGE":
+      state ={ 
+        ...state,
+       age: action.payload       
+      };
+
+      break;
+  }
+  return state;
+};
+
+
+const myLogger = (store) => (next) => (action) => {
+  console.log("Logged Action: ", action);
+  next(action);
+};
+
+const store = createStore(
+  combineReducers({math: mathReducer, user: userReducer}),
+  {},
+  applyMiddleware(myLogger, createLogger())
+);
+
+store.subscribe(() => {
+  console.log("Store Updated !", store.getState());
+});
+
+export {store};
